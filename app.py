@@ -1,31 +1,31 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template ,redirect, url_for
-from flask_dance.contrib.google import make_google_blueprint, google
 import json
+from flask_mysqldb import MySQL
 
 load_dotenv()
 
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.environ.get("APP_SECRET_KEY")
+app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_DB'] = 'sample'
 
+mysql = MySQL(app)
 
-
-blueprint = make_google_blueprint(
-    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
-    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
-    scope=["profile", "email"]
-)
-app.register_blueprint(blueprint, url_prefix="/login")
+from sample import sample
+app.register_blueprint(sample,url_prefix="/sample")
 
 @app.route("/")
 def index():
-    if not google.authorized:
-        return "GOTO /login/google to authorize yourself"
-    resp = google.get("https://www.googleapis.com/oauth2/v3/userinfo")
-    print(resp.json())
-    assert resp.ok, resp.text
-    return "You are {email} on Google".format(email=resp.json()["email"])
+    return f"Index"
+
+if __name__ == "__main__":
+    app.run()
+
+
 
 
